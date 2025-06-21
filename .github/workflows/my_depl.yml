@@ -59,8 +59,10 @@ jobs:
           ls ${{ github.workspace }}
 
       - uses: azure/setup-kubectl@v3
-      
+
       - name: Configure Kubernetes
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG }} 
         uses: azure/k8s-set-context@v3
         with:
           method: kubeconfig
