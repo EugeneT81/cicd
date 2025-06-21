@@ -57,12 +57,7 @@ jobs:
           envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
           cat $GITHUB_WORKSPACE/deployment-release.yaml
           ls ${{ github.workspace }}
-          
-      - name: Install kubectl
 
-        uses: azure/setup-kubectl@v3
-        with:
-            version: 'v1.31.0'
 
       - name: Configure Kubernetes
         uses: azure/k8s-set-context@v3
