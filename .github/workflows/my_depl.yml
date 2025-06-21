@@ -66,7 +66,7 @@ jobs:
           envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
           cat $GITHUB_WORKSPACE/deployment-release.yaml
           ls ${{ github.workspace }}
-          kubectl get nodes
+          
 
       - name: Deploy to Kubernetes
         run: |
