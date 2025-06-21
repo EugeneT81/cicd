@@ -57,7 +57,8 @@ jobs:
           envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
           cat $GITHUB_WORKSPACE/deployment-release.yaml
           ls ${{ github.workspace }}
-            - name: Install kubectl
+          
+      - name: Install kubectl
 
         uses: azure/setup-kubectl@v3
         with:
