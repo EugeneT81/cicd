@@ -58,7 +58,8 @@ jobs:
           cat $GITHUB_WORKSPACE/deployment-release.yaml
           ls ${{ github.workspace }}
 
-
+      - uses: azure/setup-kubectl@v3
+      
       - name: Configure Kubernetes
         uses: azure/k8s-set-context@v3
         with:
