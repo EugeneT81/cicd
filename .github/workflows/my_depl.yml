@@ -58,10 +58,10 @@ jobs:
       env:
         IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
       run: |
-        envsubst < $GITHUB_WORKSPACE/cicd/deployment.yml > $GITHUB_WORKSPACE/cicd/deployment-release.yaml
-        cat $GITHUB_WORKSPACE/cicd/deployment-release.yaml
+        envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
+        cat $GITHUB_WORKSPACE/deployment-release.yaml
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f $GITHUB_WORKSPACE/cicd/deployment-release.yaml
+        kubectl apply -f $GITHUB_WORKSPACE/deployment-release.yaml
         kubectl rollout status deployment/myapp
