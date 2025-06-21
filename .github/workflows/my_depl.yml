@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout branch
+      
       - uses: actions/checkout@v4
 
       - uses: actions-hub/kubectl@master
