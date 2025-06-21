@@ -45,12 +45,17 @@ jobs:
       
 
 
-      - uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
         with:
-          args: get pods
-          
+            version: 'v1.31.0'
+
+      - name: Configure Kubernetes
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
       - uses: actions/checkout@v4
 
       - name: Substitute variables
