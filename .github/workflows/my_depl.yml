@@ -38,7 +38,7 @@ jobs:
           tags: ${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release_env.outputs.image_tag }}
 
   deploy:
-    needs: [release_env, build_and_push, publish]
+    needs: [release_env, build_and_push]
     runs-on: ubuntu-latest
 
     steps:
