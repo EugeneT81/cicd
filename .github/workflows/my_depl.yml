@@ -39,7 +39,7 @@ jobs:
 
   deploy:
     needs: [release_env, build_and_push, publish]
-    runs-on: myrunner
+    runs-on: ubuntu-latest
 
     steps:
 
