@@ -58,6 +58,7 @@ jobs:
       env:
         IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
       run: |
+        ls ${{ github.workspace }}
         envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
         cat $GITHUB_WORKSPACE/deployment-release.yaml
 
