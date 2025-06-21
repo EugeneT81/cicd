@@ -36,3 +36,32 @@ jobs:
         with:
           push: true
           tags: ${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release_env.outputs.image_tag }}
+
+  deploy:
+    needs: [release_env, build_and_push, publish]
+    runs-on: myrunner
+
+    steps:
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+          version: 'v1.31.0'
+
+    - name: Configure Kubernetes
+      uses: azure/k8s-set-context@v3
+      with:
+        method: kubeconfig
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+    - name: Substitute variables
+      env:
+        IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
+      run: |
+        envsubst < $GITHUB_WORKSPACE/cicd/deployment.yml > $GITHUB_WORKSPACE/cicd/deployment-release.yaml
+        cat $GITHUB_WORKSPACE/cicd/deployment-release.yaml
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f $GITHUB_WORKSPACE/cicd/deployment-release.yaml
+        kubectl rollout status deployment/myapp
