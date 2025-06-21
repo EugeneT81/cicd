@@ -58,16 +58,11 @@ jobs:
           cat $GITHUB_WORKSPACE/deployment-release.yaml
           ls ${{ github.workspace }}
 
-      - uses: azure/setup-kubectl@v3
-
-      - name: Configure Kubernetes
+      - uses: actions-hub/kubectl@master
         env:
-          KUBECONFIG: ${{ secrets.KUBE_CONFIG }} 
-        uses: azure/k8s-set-context@v3
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}   
-          context: yc-yc-cluster
+          args: get pods
 
       - name: Deploy to Kubernetes
         run: |
