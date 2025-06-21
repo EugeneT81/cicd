@@ -42,33 +42,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout branch
+      - uses: actions/checkout@v4
 
+      - uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-          version: 'v1.31.0'
+      - uses: actions-hub/kubectl@master
+        with:
+          args: get pods
 
-    - name: Configure Kubernetes
-      uses: azure/k8s-set-context@v3
-      with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      - name: Substitute variables
+        env:
+          IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
+        run: |
+          ls ${{ github.workspace }}
+          envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
+          cat $GITHUB_WORKSPACE/deployment-release.yaml
+          ls ${{ github.workspace }}
+          kubectl get nodes
 
-    - name: Checkout branch
-      uses: actions/checkout@v4
-
-    - name: Substitute variables
-      env:
-        IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
-      run: |
-        ls ${{ github.workspace }}
-        envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
-        cat $GITHUB_WORKSPACE/deployment-release.yaml
-        ls ${{ github.workspace }}
-        kubectl get nodes
-
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f $GITHUB_WORKSPACE/deployment-release.yaml
-        kubectl rollout status deployment/myapp
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f $GITHUB_WORKSPACE/deployment-release.yaml
+          kubectl rollout status deployment/myapp
