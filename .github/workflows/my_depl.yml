@@ -43,6 +43,7 @@ jobs:
 
     steps:
 
+
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
       with:
@@ -53,6 +54,9 @@ jobs:
       with:
         method: kubeconfig
         kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+    - name: Checkout branch
+      uses: actions/checkout@v4
 
     - name: Substitute variables
       env:
