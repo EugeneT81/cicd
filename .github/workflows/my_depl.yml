@@ -7,7 +7,7 @@ on:
 
 jobs:
   release_env:
-    runs-on: eugenek8s-client
+    runs-on: self-hosted
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
 
@@ -20,7 +20,7 @@ jobs:
      
   build_and_push:
     needs: [release_env]
-    runs-on: eugenek8s-client
+    runs-on: self-hosted
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -39,7 +39,7 @@ jobs:
 
   deploy:
     needs: [release_env, build_and_push]
-    runs-on: eugenek8s-client
+    runs-on: self-hosted
 
     steps:
       
