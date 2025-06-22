@@ -17,7 +17,7 @@ spec:
         app: myapplication
     spec:
       containers:
-        - image: eugene513/myapplication:${IMAGE_TAG}
+        - image: eugene513/cicd:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           name: myapplication
 
