@@ -1,12 +1,11 @@
-name: Release myapp
+name: Build and push Docker image
 
 on: 
   push:
     tags:
-      - 'v*'
+      - v*.*
 
 jobs:
-
   release_env:
     runs-on: self-hosted
     outputs:
@@ -15,71 +14,57 @@ jobs:
     steps:
       - id: tag
         run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            echo "image_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          else
-            echo "image_tag=latest"  >> $GITHUB_OUTPUT
-          fi
+          echo "image_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            
 
-  build:
-    needs: release_env
+     
+  build_and_push:
+    needs: [release_env]
     runs-on: self-hosted
-    
     steps:
-
-      - name: Checkout branch
-        uses: actions/checkout@v4
-
-      - name: Build image
-        run: |
-          echo "Building with tag: ${{ needs.release_env.outputs.image_tag }}"
-          docker build -t ${{ vars.IMAGE_NAME }}:${{ needs.release_env.outputs.image_tag }} -f Dockerfile .
-
-  publish:
-    needs: [release_env, build]
-    runs-on: self-hosted
-
-    steps:
-
-      - name: Login to the registry
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Publish image
-        run: |
-          docker push ${{ vars.IMAGE_NAME }}:${{ needs.release_env.outputs.image_tag }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release_env.outputs.image_tag }}
 
   deploy:
-    needs: [release_env, build, publish]
+    needs: [release_env, build_and_push]
     runs-on: self-hosted
 
     steps:
-
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-          version: 'v1.31.0'
-
-    - name: Configure Kubernetes
-      uses: azure/k8s-set-context@v3
-      with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.KUBE_CONFIG }}
-
-    - name: Substitute variables
-      env:
-        IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
-      run: |
-        envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
-        cat $GITHUB_WORKSPACE/deployment-release.yaml
-
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f $GITHUB_WORKSPACE/deployment-release.yaml
-        kubectl rollout status deployment/myapp
+      
 
 
 
 
+      - uses: actions/checkout@v4
+
+      - name: Substitute variables
+        env:
+          IMAGE_TAG: ${{ needs.release_env.outputs.image_tag }}
+        run: |
+          ls ${{ github.workspace }}
+          envsubst < $GITHUB_WORKSPACE/deployment.yml > $GITHUB_WORKSPACE/deployment-release.yaml
+          cat $GITHUB_WORKSPACE/deployment-release.yaml
+          ls ${{ github.workspace }}
+
+      - uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args: get pods
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f $GITHUB_WORKSPACE/deployment-release.yaml
+          kubectl rollout status deployment/myapp
